@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader, random_split
 
 class SatelliteDataLoader:
     def __init__(self, data_path, batch_size=32, val_split=0.2, num_workers=4):
+        self.data_path = data_path
         self.train_transform = transforms.Compose([
             transforms.Resize((256, 256)),
             transforms.RandomHorizontalFlip(),
@@ -18,7 +19,7 @@ class SatelliteDataLoader:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        data = datasets.ImageFolder(root="src/data/UCMerced_LandUse/Images", transform=self.train_transform)
+        data = datasets.ImageFolder(root=self.data_path, transform=self.train_transform)
 
         self.dataset_size = len(data)
         self.train_size = int((1 - val_split) * self.dataset_size)
