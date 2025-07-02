@@ -26,7 +26,6 @@ class SatelliteDataLoader:
         self.val_size = self.dataset_size - self.train_size
 
         self.train_dataset, self.val_dataset = random_split(data, [self.train_size, self.val_size])
-
         self.val_dataset.dataset.transform = self.val_transform
 
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
