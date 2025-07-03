@@ -12,7 +12,7 @@ class SatelliteDataLoader:
 
         self.train_transform = transforms.Compose([
             transforms.Resize((256, 256)),
-            transforms.RandomHorizontalFlip(),
+            transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomRotation(30),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -23,13 +23,17 @@ class SatelliteDataLoader:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-        self.full_dataset = datasets.ImageFolder(root=self.data_path)
-        self.class_names = self.full_dataset.classes
+        train_full_dataset = datasets.ImageFolder(root=self.data_path, transform=self.train_transform)
+        val_full_dataset = datasets.ImageFolder(root=self.data_path, transform=self.val_transform)
 
-        train_indices, val_indices = self._stratified_split()
+        self.class_names = train_full_dataset.classes
 
-        self.train_dataset = self._create_subset(train_indices, self.train_transform)
-        self.val_dataset = self._create_subset(val_indices, self.val_transform)
+        labels = [train_full_dataset[i][1] for i in range(len(train_full_dataset))]
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=val_split, random_state=42)
+        train_indices, val_indices = next(sss.split(range(len(train_full_dataset)), labels))
+
+        self.train_dataset = Subset(train_full_dataset, train_indices.tolist())
+        self.val_dataset = Subset(val_full_dataset, val_indices.tolist())
 
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
         self.val_loader = DataLoader(self.val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
@@ -39,16 +43,3 @@ class SatelliteDataLoader:
     
     def get_class_names(self):
         return self.class_names
-    
-    def _stratified_split(self):
-        labels = [self.full_dataset[i][1] for i in range(len(self.full_dataset))]
-
-        sss = StratifiedShuffleSplit(n_splits=1, test_size=self.val_split, random_state=42)
-        train_indices, val_indices = next(sss.split(range(len(self.full_dataset)), labels))
-
-        return train_indices.tolist(), val_indices.tolist()
-    
-    def _create_subset(self, indices, transform):
-        subset = Subset(self.full_dataset, indices)
-        subset.dataset.transform = transform
-        return subset
