@@ -11,10 +11,10 @@ class SatelliteCNN(nn.Module):
 
         # classification layer
         self.base_model.fc = nn.Sequential(
-            nn.Dropout(0.5),
+            nn.Dropout(0.3),
             nn.Linear(self.base_model.fc.in_features, 512),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.2),
             nn.Linear(512, num_classes)
         )
 
