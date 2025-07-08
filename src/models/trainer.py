@@ -12,8 +12,8 @@ class SatelliteCNNTrainer:
         self.device = device
 
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=.0001, weight_decay=1e-4)
-        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=7, gamma=0.1)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=.001, weight_decay=1e-4)
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=16, gamma=0.9)
 
         # track the training history
         self.train_losses = []
